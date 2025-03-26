@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const cheerio = require("cheerio");
 const path = require("path");
+const url = require("url");
 
 const app = express();
 const PORT = 3001;
@@ -19,33 +20,19 @@ app.get("/", (req, res) => {
 // API endpoint to fetch and modify content
 app.post("/fetch", async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url: targetUrl } = req.body;
 
-    if (!url) {
+    if (!targetUrl) {
       return res.status(400).json({ error: "URL is required" });
     }
 
     // Fetch the content from the provided URL
-    const response = await axios.get(url);
+    const response = await axios.get(targetUrl);
     const html = response.data;
 
     // Use cheerio to parse HTML and selectively replace text content, not URLs
     const $ = cheerio.load(html);
-
-    // Function to replace text but skip URLs and attributes
-    function replaceYaleWithFale(i, el) {
-      if ($(el).children().length === 0 || $(el).text().trim() !== "") {
-        // Get the HTML content of the element
-        let content = $(el).html();
-
-        // Only process if it's a text node
-        if (content && $(el).children().length === 0) {
-          // Replace Yale with Fale in text content only
-          content = content.replace(/Yale/g, "Fale").replace(/yale/g, "fale");
-          $(el).html(content);
-        }
-      }
-    }
+    const baseUrl = new URL(targetUrl).origin;
 
     // Process text nodes in the body
     $("body *")
@@ -69,11 +56,33 @@ app.post("/fetch", async (req, res) => {
       .replace(/yale/g, "fale");
     $("title").text(title);
 
+    // Fix CSS and other resource paths
+    $('link[rel="stylesheet"]').each(function () {
+      const href = $(this).attr("href");
+      if (href && !href.startsWith("http")) {
+        $(this).attr("href", new URL(href, baseUrl).href);
+      }
+    });
+
+    $("script[src]").each(function () {
+      const src = $(this).attr("src");
+      if (src && !src.startsWith("http")) {
+        $(this).attr("src", new URL(src, baseUrl).href);
+      }
+    });
+
+    $("img[src]").each(function () {
+      const src = $(this).attr("src");
+      if (src && !src.startsWith("http")) {
+        $(this).attr("src", new URL(src, baseUrl).href);
+      }
+    });
+
     return res.json({
       success: true,
       content: $.html(),
       title: title,
-      originalUrl: url,
+      originalUrl: targetUrl,
     });
   } catch (error) {
     console.error("Error fetching URL:", error.message);
