@@ -39,17 +39,17 @@ app.post("/fetch", async (req, res) => {
       return text.replace(/Yale/g, "Fale").replace(/yale/g, "fale");
     }
 
-    // Process all text nodes
-    $("*")
+    // Process text nodes in the body
+    $("body *")
       .contents()
+      .filter(function () {
+        return this.nodeType === 3; // Text nodes only
+      })
       .each(function () {
-        if (this.nodeType === 3) {
-          // Text node
-          const text = $(this).text();
-          const newText = replaceText(text);
-          if (text !== newText) {
-            $(this).replaceWith(newText);
-          }
+        const text = $(this).text();
+        const newText = replaceText(text);
+        if (text !== newText) {
+          $(this).replaceWith(newText);
         }
       });
 
