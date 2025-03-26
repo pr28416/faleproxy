@@ -29,7 +29,7 @@ npm start
 ```
 
 2. Open a browser and go to `http://localhost:3001`
-3. Enter a URL in the input field (e.g., https://www.yale.edu)
+3. Enter a URL in the input field (e.g., https://www.fale.edu)
 4. Click "Fetch & Replace" to see the modified content
 
 ## Development

@@ -3,41 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faleproxy - Replace Yale with Fale</title>
+    <title>Yaleproxy - Replace Yale with Yale</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Faleproxy</h1>
-            <form id="url-form">
-                <div class="form-group">
-                    <input type="url" id="url-input" placeholder="Enter URL (e.g., https://www.yale.edu)" required>
-                    <button type="submit">Fetch & Replace</button>
-                </div>
-            </form>
+            <div class="header-content">
+                <h1><i class="fas fa-exchange-alt"></i> Yaleproxy</h1>
+                <p class="subtitle">Transform Yale into Yale with one click</p>
+                <form id="url-form">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-link"></i>
+                            <input type="url" id="url-input" placeholder="Enter URL (e.g., https://www.yale.edu)" required>
+                        </div>
+                        <button type="submit">
+                            <i class="fas fa-magic"></i>
+                            Transform
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </header>
 
     <main class="container">
         <div id="loading" class="hidden">
             <div class="spinner"></div>
-            <p>Fetching and processing content...</p>
+            <p>Transforming content...</p>
         </div>
 
-        <div id="error-message" class="hidden"></div>
+        <div id="error-message" class="hidden">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="error-text"></span>
+        </div>
 
         <div id="result-container" class="hidden">
             <div id="info-bar">
-                <p>Original URL: <a id="original-url" target="_blank" rel="noopener noreferrer"></a></p>
-                <p>Page Title: <span id="page-title"></span></p>
+                <div class="info-item">
+                    <i class="fas fa-globe"></i>
+                    <span>Original URL: <a id="original-url" target="_blank" rel="noopener noreferrer"></a></span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-tag"></i>
+                    <span>Page Title: <span id="page-title"></span></span>
+                </div>
             </div>
             <div id="content-display"></div>
         </div>
     </main>
 
     <footer class="container">
-        <p>Faleproxy - Created on March 26, 2025</p>
+        <div class="footer-content">
+            <p>Made with <i class="fas fa-heart"></i> by Yaleproxy</p>
+            <p class="version">v1.0.0</p>
+        </div>
     </footer>
 
     <script src="script.js"></script>
