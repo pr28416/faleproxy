@@ -11,9 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   urlForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    await loadUrl(urlInput.value.trim());
+  });
 
-    const url = urlInput.value.trim();
-
+  async function loadUrl(url) {
     if (!url) {
       showError("Please enter a valid URL");
       return;
@@ -61,11 +62,16 @@ document.addEventListener("DOMContentLoaded", () => {
       iframe.onload = function () {
         iframe.style.height = iframeDocument.body.scrollHeight + "px";
 
-        // Make sure links open in a new tab
+        // Handle link clicks within the iframe
         const links = iframeDocument.querySelectorAll("a");
         links.forEach((link) => {
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
+          link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const href = link.getAttribute("href");
+            if (href && !href.startsWith("javascript:")) {
+              await loadUrl(href);
+            }
+          });
         });
       };
 
@@ -77,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Hide loading indicator
       loadingElement.classList.add("hidden");
     }
-  });
+  }
 
   function showError(message) {
     errorText.textContent = message;

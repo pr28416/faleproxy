@@ -34,27 +34,36 @@ app.post("/fetch", async (req, res) => {
     const $ = cheerio.load(html);
     const baseUrl = new URL(targetUrl).origin;
 
-    // Process text nodes in the body
-    $("body *")
+    // Function to replace text while preserving URLs and attributes
+    function replaceText(text) {
+      return text.replace(/Yale/g, "Fale").replace(/yale/g, "fale");
+    }
+
+    // Process all text nodes
+    $("*")
       .contents()
-      .filter(function () {
-        return this.nodeType === 3; // Text nodes only
-      })
       .each(function () {
-        // Replace text content but not in URLs or attributes
-        const text = $(this).text();
-        const newText = text.replace(/Yale/g, "Fale").replace(/yale/g, "fale");
-        if (text !== newText) {
-          $(this).replaceWith(newText);
+        if (this.nodeType === 3) {
+          // Text node
+          const text = $(this).text();
+          const newText = replaceText(text);
+          if (text !== newText) {
+            $(this).replaceWith(newText);
+          }
         }
       });
 
     // Process title separately
-    const title = $("title")
-      .text()
-      .replace(/Yale/g, "Fale")
-      .replace(/yale/g, "fale");
+    const title = replaceText($("title").text());
     $("title").text(title);
+
+    // Process meta tags
+    $('meta[name="description"]').each(function () {
+      const content = $(this).attr("content");
+      if (content) {
+        $(this).attr("content", replaceText(content));
+      }
+    });
 
     // Fix CSS and other resource paths
     $('link[rel="stylesheet"]').each(function () {
@@ -76,6 +85,17 @@ app.post("/fetch", async (req, res) => {
       if (src && !src.startsWith("http")) {
         $(this).attr("src", new URL(src, baseUrl).href);
       }
+    });
+
+    // Process alt text and other attributes that might contain text
+    $("[alt], [title], [placeholder]").each(function () {
+      const element = $(this);
+      ["alt", "title", "placeholder"].forEach((attr) => {
+        const value = element.attr(attr);
+        if (value) {
+          element.attr(attr, replaceText(value));
+        }
+      });
     });
 
     return res.json({
