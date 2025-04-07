@@ -5,6 +5,13 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      deploy_to_production:
+        description: 'Deploy to production after preview'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
@@ -68,23 +75,31 @@ jobs:
           exit 1
         fi
         echo "Vercel token is configured."
-      
+    
+    # Create a preview deployment first  
     - name: Pull Vercel Environment Information
-      run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+      run: vercel pull --yes --environment=preview --token="${{ secrets.VERCEL_TOKEN }}"
       
-    - name: Build Project Artifacts
-      run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+    - name: Build Project Artifacts (Preview)
+      run: vercel build --token="${{ secrets.VERCEL_TOKEN }}"
       
-    - name: Deploy Project Artifacts to Vercel
-      id: deploy
+    - name: Create Preview Deployment
+      id: preview_deploy
       run: |
-        DEPLOY_OUTPUT=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")
+        DEPLOY_OUTPUT=$(vercel deploy --token="${{ secrets.VERCEL_TOKEN }}")
         echo "$DEPLOY_OUTPUT"
         PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -o 'https://.*\.vercel\.app' || echo "Preview URL not found")
         echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-        echo "::notice::Deployment URL: $PREVIEW_URL"
+        echo "::notice::Preview URL: $PREVIEW_URL"
     
-    - name: Display Deployment URL
+    - name: Display Preview URL
       run: |
-        echo "📋 Deployment complete!"
-        echo "🚀 Preview URL: ${{ steps.deploy.outputs.preview_url }}"
+        echo "📋 Preview deployment complete!"
+        echo "🔍 Preview URL: ${{ steps.preview_deploy.outputs.preview_url }}"
+
+    # Only promote to production if explicitly requested
+    - name: Deploy to Production
+      if: github.event.inputs.deploy_to_production == true
+      run: |
+        vercel promote --token="${{ secrets.VERCEL_TOKEN }}" ${{ steps.preview_deploy.outputs.preview_url }}
+        echo "🚀 Promoted to production!"
