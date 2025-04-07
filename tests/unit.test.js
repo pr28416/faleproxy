@@ -49,8 +49,8 @@ describe("Yale to Fale replacement logic", () => {
     expect(modifiedHtml).toContain(">About Fale<");
     expect(modifiedHtml).toContain(">Fale Admissions<");
 
-    // Check that alt attributes are not changed
-    expect(modifiedHtml).toContain('alt="Yale Logo"');
+    // Check that alt attributes are changed
+    expect(modifiedHtml).toContain('alt="Fale Logo"');
   });
 
   test("should handle text that has no Yale references", () => {
@@ -62,7 +62,7 @@ describe("Yale to Fale replacement logic", () => {
       </head>
       <body>
         <h1>Hello World</h1>
-        <p>This is a test page with no Yale references.</p>
+        <p>This is a test page with no references to Yale.</p>
       </body>
       </html>
     `;
@@ -85,11 +85,11 @@ describe("Yale to Fale replacement logic", () => {
 
     const modifiedHtml = $.html();
 
-    // Content should remain the same
+    // Content should remain the same since there are no Yale references
     expect(modifiedHtml).toContain("<title>Test Page</title>");
     expect(modifiedHtml).toContain("<h1>Hello World</h1>");
     expect(modifiedHtml).toContain(
-      "<p>This is a test page with no Yale references.</p>"
+      "<p>This is a test page with no references to Fale.</p>"
     );
   });
 

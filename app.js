@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Route to serve the main page
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.send("Faleproxy server is running");
 });
 
 // API endpoint to fetch and modify content
@@ -87,10 +87,10 @@ app.post("/fetch", async (req, res) => {
       }
     });
 
-    // Process alt text and other attributes that might contain text
-    $("[alt], [title], [placeholder]").each(function () {
+    // Process title and placeholder attributes that might contain text
+    $("[title], [placeholder]").each(function () {
       const element = $(this);
-      ["alt", "title", "placeholder"].forEach((attr) => {
+      ["title", "placeholder"].forEach((attr) => {
         const value = element.attr(attr);
         if (value) {
           element.attr(attr, replaceText(value));
